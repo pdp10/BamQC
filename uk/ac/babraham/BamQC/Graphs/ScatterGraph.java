@@ -323,7 +323,9 @@ public class ScatterGraph extends JPanel {
 		tips = new ArrayList<String>();
 		
 
-		g.setColor(Color.BLUE);
+		if (g instanceof Graphics2D) {
+			((Graphics2D)g).setStroke(new BasicStroke(0.4f));
+		}		
 		// Draw the data points
 		double ovalSize = 5;
 		// We distinguish two inputs since the x label does not start from 0.
@@ -333,8 +335,35 @@ public class ScatterGraph extends JPanel {
 		for (int d = 0; d < data.length; d++) {
 			double x = getX(xCategories[d], xOffset)-ovalSize/2;
 			double y = getY(data[d])-ovalSize/2;
+			g.setColor(Color.BLUE);
 			g.fillOval((int)x, (int)y, (int)(ovalSize), (int)(ovalSize));
-			g.drawString(toolTipLabels[d], (int)x+2, (int)y+16);
+			
+			// Let's draw the labels
+			// A quick dirty way to spread them a bit 
+			g.setColor(Color.BLACK);
+			// TODO: 
+			// - Add connecting lines 
+			// - remove tooltips.
+			if(d<(double)data.length / 4) {
+				g.drawString(toolTipLabels[d], getX(xCategories[d], xOffset-50 + d*5), getY(data[d]-2));
+				g.setColor(Color.LIGHT_GRAY);
+				g.drawLine(getX(xCategories[d], xOffset), getY(data[d]-0.05), getX(xCategories[d], xOffset-45 + d*5), getY(data[d]-1.8));
+			} 
+			else if(d<(double)data.length / 2) {
+				g.drawString(toolTipLabels[d], getX(xCategories[d], xOffset-140 + d*3.5), getY(data[d] -2.5 + d*0.1));			
+				g.setColor(Color.LIGHT_GRAY);
+				g.drawLine(getX(xCategories[d], xOffset-10), getY(data[d]), getX(xCategories[d], xOffset-120 + d*3.5), getY(data[d] -2.5 + d*0.1));
+			} 
+			else if(d<(double)(data.length) / 4 * 3) {
+				g.drawString(toolTipLabels[d], getX(xCategories[d], xOffset-40 + d*1.5), getY(data[d] -2.5 + d*0.05));						
+				g.setColor(Color.LIGHT_GRAY);
+				g.drawLine(getX(xCategories[d], xOffset), getY(data[d]-0.05), getX(xCategories[d], xOffset-40 + d*1.5), getY(data[d] -2.5 + d*0.05));
+			} 
+			else {
+				g.drawString(toolTipLabels[d], getX(xCategories[d], xOffset-160 + d*0.5), getY(data[d] -2.5 + d*0.05));
+				g.setColor(Color.LIGHT_GRAY);
+				g.drawLine(getX(xCategories[d], xOffset-10), getY(data[d]), getX(xCategories[d], xOffset-140 + d*0.5), getY(data[d] -2.5 + d*0.05));
+			}
 			inputVar[d] = Double.valueOf(xCategories[d]); 
 			responseVar[d] = data[d];
 
@@ -417,8 +446,8 @@ public class ScatterGraph extends JPanel {
 		return (getHeight() - 40) - (int) (((getHeight() - 80) / (maxY - minY)) * y);
 	}
 	
-	private int getX(double x, int xOffset) {
-		return  xOffset + (int) (((getWidth() - 40) / (maxX - minX)) * x);
+	private int getX(double x, double d) {
+		return  (int) (d + (((getWidth() - 40) / (maxX - minX)) * x));
 	}
 
 	
@@ -488,7 +517,7 @@ public class ScatterGraph extends JPanel {
 			@Override
 			public void run() {
 				Random r = new Random();
-				int sampleSize = 1000;
+				int sampleSize = 50;
 				double[] data = new double[sampleSize];
 				double[] xCategories = new double[sampleSize];
 				String[] toolTipsLabels = new String[sampleSize];
